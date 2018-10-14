@@ -148,6 +148,10 @@ void MovePicker::score() {
                   m.value += (1 << 27);
           }
 #endif
+#ifdef RACE
+          if (pos.is_race())
+              m.value -= Value(200 * relative_rank(BLACK, to_sq(m)));
+#endif
       }
       else // Type == EVASIONS
       {
