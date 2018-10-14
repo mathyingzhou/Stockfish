@@ -133,6 +133,14 @@ void MovePicker::score() {
 #endif
           m.value =  PieceValue[pos.variant()][MG][pos.piece_on(to_sq(m))]
                    + (*captureHistory)[pos.moved_piece(m)][to_sq(m)][type_of(pos.piece_on(to_sq(m)))] / 8;
+#ifdef ANTI
+          if (pos.is_anti() && pos.attackers_to(to_sq(m), pos.pieces() ^ from_sq(m)) & pos.pieces(~pos.side_to_move()))
+          {
+              m.value += (1 << 26);
+              if (!(pos.attackers_to(from_sq(m)) & pos.pieces(~pos.side_to_move())))
+                  m.value += (1 << 25);
+          }
+#endif
       }
       else if (Type == QUIETS)
       {
