@@ -108,20 +108,6 @@ namespace {
   template<Variant V, GenType Type, Direction D>
   ExtMove* make_promotions(ExtMove* moveList, Square to, Square ksq) {
 
-#ifdef ANTI
-    if (V == ANTI_VARIANT)
-    {
-        if (Type == QUIETS || Type == CAPTURES || Type == NON_EVASIONS)
-        {
-            *moveList++ = make<PROMOTION>(to - D, to, QUEEN);
-            *moveList++ = make<PROMOTION>(to - D, to, ROOK);
-            *moveList++ = make<PROMOTION>(to - D, to, BISHOP);
-            *moveList++ = make<PROMOTION>(to - D, to, KNIGHT);
-            *moveList++ = make<PROMOTION>(to - D, to, KING);
-        }
-        return moveList;
-    }
-#endif
 #ifdef LOSERS
     if (V == LOSERS_VARIANT)
     {
@@ -136,7 +122,13 @@ namespace {
     }
 #endif
     if (Type == CAPTURES || Type == EVASIONS || Type == NON_EVASIONS)
+    {
+#ifdef ANTI
+        if (V == ANTI_VARIANT)
+            *moveList++ = make<PROMOTION>(to - D, to, KING);
+#endif
         *moveList++ = make<PROMOTION>(to - D, to, QUEEN);
+    }
 
     if (Type == QUIETS || Type == EVASIONS || Type == NON_EVASIONS)
     {
