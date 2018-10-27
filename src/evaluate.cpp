@@ -818,6 +818,10 @@ namespace {
             kingAttackersWeight[Us] += KingAttackWeights[pos.variant()][Pt];
             kingAttacksCount[Us] += popcount(b & attackedBy[Them][KING]);
         }
+#ifdef RACE
+        if (pos.is_race())
+            b &= ~pos.check_squares(Pt);
+#endif
 
         int mob = popcount(b & mobilityArea[Us]);
 
