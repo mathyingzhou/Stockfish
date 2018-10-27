@@ -79,7 +79,7 @@ namespace {
         if (pos.attackers_to(s) & enemies)
             return moveList;
 #ifdef RELAY
-        else if (pos.is_relay() & pos.relayed_attackers_to(s, ~us))
+        else if (pos.is_relay() && pos.relayed_attackers_to(s, ~Us))
             return moveList;
 #endif
 
