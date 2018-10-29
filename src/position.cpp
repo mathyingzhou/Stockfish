@@ -2148,12 +2148,12 @@ bool Position::see_ge(Move m, Value threshold) const {
       if (!(st->pinners[~stm] & ~occupied))
           stmAttackers &= ~st->blockersForKing[stm];
 #ifdef RACE
-      // Exclude checks in racing kings
+      // Exclude other checks in racing kings
       if (is_race())
       {
           // Direct checks
           for (PieceType pt = KNIGHT; pt <= QUEEN; ++pt)
-              if (attacks_from(pt, to) & square<KING>(~stm))
+              if (attacks_bb(pt, to, occupied) & square<KING>(~stm))
                   stmAttackers &= ~pieces(stm, pt);
 
           // Discovered checks

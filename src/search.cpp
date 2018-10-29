@@ -1627,7 +1627,7 @@ moves_loop: // When in check, search starts from here
           && !pos.is_extinction()
 #endif
 #ifdef RACE
-          && !(pos.is_race() && type_of(pos.piece_on(from_sq(move))) == KING && rank_of(to_sq(move)) == RANK_8)
+          && !(pos.is_race() && type_of(pos.moved_piece(move)) == KING && (Rank8BB & to_sq(move)))
 #endif
           &&  futilityBase > -VALUE_KNOWN_WIN
           && !pos.advanced_pawn_push(move))
