@@ -1591,6 +1591,11 @@ namespace {
 
     int outflanking =  distance<File>(pos.square<KING>(WHITE), pos.square<KING>(BLACK))
                      - distance<Rank>(pos.square<KING>(WHITE), pos.square<KING>(BLACK));
+#ifdef RACE
+    // Positions where one king is advanced may be complex
+    if (pos.is_race())
+        outflanking = 8 * distance<Rank>(pos.square<KING>(WHITE), pos.square<KING>(BLACK)) - outflanking;
+#endif
 
     bool pawnsOnBothFlanks =   (pos.pieces(PAWN) & QueenSide)
                             && (pos.pieces(PAWN) & KingSide);
