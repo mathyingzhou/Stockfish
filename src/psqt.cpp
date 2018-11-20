@@ -103,7 +103,7 @@ namespace PSQT {
 // type on a given square a (middlegame, endgame) score pair is assigned. Table
 // is defined for files A..D and white side: it is symmetric for black side and
 // second half of the files.
-constexpr Score Bonus[VARIANT_NB][PIECE_TYPE_NB][RANK_NB][int(FILE_NB) / 2] = {
+Score Bonus[VARIANT_NB][PIECE_TYPE_NB][RANK_NB][int(FILE_NB) / 2] = {
   {
     { },
     { // Pawn
@@ -867,7 +867,7 @@ constexpr Score Bonus[VARIANT_NB][PIECE_TYPE_NB][RANK_NB][int(FILE_NB) / 2] = {
 
 #ifdef CRAZYHOUSE
 Score psq[VARIANT_NB][PIECE_NB][SQUARE_NB+1];
-constexpr Score inHandBonus[PIECE_TYPE_NB] = {
+Score inHandBonus[PIECE_TYPE_NB] = {
     S(0, 0), S(52, 13), S(66, 30), S(4, 4), S(13, 3), S(25, 9)
 };
 #else
@@ -914,5 +914,10 @@ for (Variant var = CHESS_VARIANT; var < VARIANT_NB; ++var)
 #endif
   }
 }
+TUNE(Bonus[CRAZYHOUSE_VARIANT][PAWN], Bonus[CRAZYHOUSE_VARIANT][KNIGHT],
+     Bonus[CRAZYHOUSE_VARIANT][BISHOP], Bonus[CRAZYHOUSE_VARIANT][ROOK],
+     Bonus[CRAZYHOUSE_VARIANT][QUEEN], Bonus[CRAZYHOUSE_VARIANT][KING],
+     inHandBonus[PAWN], inHandBonus[KNIGHT], inHandBonus[BISHOP],
+     inHandBonus[ROOK], inHandBonus[QUEEN], PSQT::init);
 
 } // namespace PSQT
