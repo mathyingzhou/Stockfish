@@ -422,36 +422,79 @@ void MainThread::search() {
 
   // Check if there are threads with a better score than main thread
   Thread* bestThread = this;
+#ifdef USELONGESTPV
+  size_t longestPlies = 0;
+  Thread* longestPVThread = this;
+  const size_t minPlies = 6;
+#endif
   if (    Options["MultiPV"] == 1
       && !Limits.depth
       && !Skill(Options["Skill Level"]).enabled()
       &&  rootMoves[0].pv[0] != MOVE_NONE)
   {
-      std::map<Move, int> votes;
-      Value minScore = this->rootMoves[0].score;
-
-      // Find out minimum score and reset votes for moves which can be voted
-      for (Thread* th: Threads)
+      for (Thread* th : Threads)
       {
-          minScore = std::min(minScore, th->rootMoves[0].score);
-          votes[th->rootMoves[0].pv[0]] = 0;
-      }
+          Depth depthDiff = th->completedDepth - bestThread->completedDepth;
+          Value scoreDiff = th->rootMoves[0].score - bestThread->rootMoves[0].score;
 
+<<<<<<< HEAD
       // Vote according to score and depth
       for (Thread* th : Threads)
           votes[th->rootMoves[0].pv[0]] +=  int(th->rootMoves[0].score - minScore)
                                           + int(th->completedDepth);
-
-      // Select best thread
-      int bestVote = votes[this->rootMoves[0].pv[0]];
-      for (Thread* th : Threads)
-      {
-          if (votes[th->rootMoves[0].pv[0]] > bestVote)
-          {
-              bestVote = votes[th->rootMoves[0].pv[0]];
+=======
+          // Select the thread with the best score, always if it is a mate
+          if (    scoreDiff > 0
+              && (depthDiff >= 0 || th->rootMoves[0].score >= VALUE_MATE_IN_MAX_PLY))
               bestThread = th;
+#ifdef USELONGESTPV
+          longestPlies = std::max(th->rootMoves[0].pv.size(), longestPlies);
+#endif
+      }
+>>>>>>> parent of ba928db1... Merge branch 'master' of https://github.com/official-stockfish/Stockfish
+
+#ifdef USELONGESTPV
+      longestPVThread = bestThread;
+      if (bestThread->rootMoves[0].pv.size() < std::min(minPlies, longestPlies))
+      {
+          const int maxScoreDiff = Eval::Tempo[rootPos.variant()];
+          const int maxDepthDiff = 2;
+
+          // Select the best thread that meets the minimum move criteria
+          // and is within the appropriate range of score eval
+          for (Thread* th : Threads)
+          {
+              if (th->rootMoves[0].pv.size() <= bestThread->rootMoves[0].pv.size())
+                  continue;
+              auto begin = bestThread->rootMoves[0].pv.begin(),
+                     end = bestThread->rootMoves[0].pv.end();
+              if (std::mismatch(begin, end, th->rootMoves[0].pv.begin()).first != end)
+                  continue;
+
+              if (longestPVThread->rootMoves[0].pv.size() < std::min(minPlies, longestPlies))
+              {
+                  // If our current longest is short, allow a weakening of score
+                  // and depth to an absolute max of maxScoreDiff / maxDepthDiff
+                  // compared to the bestThread
+                  if (   th->rootMoves[0].pv.size() >= longestPVThread->rootMoves[0].pv.size()
+                      && abs(bestThread->rootMoves[0].score - th->rootMoves[0].score) < maxScoreDiff
+                      && (bestThread->completedDepth - th->completedDepth < maxDepthDiff))
+                      longestPVThread = th;
+              }
+              else
+              {
+                  // Since longestPVThread is already long, only select among
+                  // threads with long PVs with strong eval/depth
+                  if (   th->rootMoves[0].pv.size() >= std::min(minPlies, longestPlies)
+                      && abs(bestThread->rootMoves[0].score - th->rootMoves[0].score) < maxScoreDiff
+                      && (   th->rootMoves[0].score >= longestPVThread->rootMoves[0].score
+                          || th->completedDepth >= longestPVThread->completedDepth)
+                     )
+                     longestPVThread = th;
+              }
           }
       }
+#endif
   }
 
   previousScore = bestThread->rootMoves[0].score;
@@ -1305,12 +1348,18 @@ moves_loop: // When in check, search starts from here
               r -= r ? ONE_PLY : DEPTH_ZERO;
           else
 #endif
-          // Decrease reduction if opponent's move count is high (~10 Elo)
-          if ((ss-1)->moveCount > 15)
-              r -= ONE_PLY;
-
-          if (!captureOrPromotion)
+          if (captureOrPromotion) // (~5 Elo)
           {
+              // Decrease reduction by comparing opponent's stat score
+              if ((ss-1)->statScore < 0)
+                  r -= ONE_PLY;
+          }
+          else
+          {
+              // Decrease reduction if opponent's move count is high (~5 Elo)
+              if ((ss-1)->moveCount > 15)
+                  r -= ONE_PLY;
+
               // Decrease reduction for exact PV nodes (~0 Elo)
               if (pvExact)
                   r -= ONE_PLY;
