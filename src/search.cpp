@@ -422,6 +422,10 @@ void MainThread::search() {
 
   // Check if there are threads with a better score than main thread
   Thread* bestThread = this;
+#ifdef USELONGESTPV
+  size_t longestPlies = 5;
+  Thread* longestPVThread = this;
+#endif
   if (    Options["MultiPV"] == 1
       && !Limits.depth
       && !Skill(Options["Skill Level"]).enabled()
@@ -435,6 +439,9 @@ void MainThread::search() {
       {
           minScore = std::min(minScore, th->rootMoves[0].score);
           votes[th->rootMoves[0].pv[0]] = 0;
+#ifdef USELONGESTPV
+          longestPlies = std::max(th->rootMoves[0].pv.size(), longestPlies);
+#endif
       }
 
       // Vote according to score and depth
@@ -453,6 +460,35 @@ void MainThread::search() {
               bestThread = th;
           }
       }
+#ifdef USELONGESTPV
+      longestPVThread = bestThread;
+      if (bestThread->rootMoves[0].pv.size() < longestPlies)
+      {
+          // Select the longest PV within score and depth tolerances
+          for (Thread* th : Threads)
+          {
+              if (2 * votes[th->rootMoves[0].pv[0]] <= bestVote)
+                  continue;
+              auto begin = bestThread->rootMoves[0].pv.begin(),
+                     end = bestThread->rootMoves[0].pv.end();
+              if (std::mismatch(begin, end, th->rootMoves[0].pv.begin()).first != end)
+                  continue;
+
+              if (longestPVThread->rootMoves[0].pv.size() < longestPlies)
+              {
+                  // Sllow a weakening of score and depth relative to the bestThread PV
+                  if (th->rootMoves[0].pv.size() > longestPVThread->rootMoves[0].pv.size())
+                      longestPVThread = th;
+              }
+              else if (th->rootMoves[0].pv.size() >= longestPlies)
+              {
+                  // Strengthen score and depth by selecting among long PVs
+                  if (votes[th->rootMoves[0].pv[0]] >= votes[longestPVThread->rootMoves[0].pv[0]])
+                      longestPVThread = th;
+              }
+          }
+      }
+#endif
   }
 
   previousScore = bestThread->rootMoves[0].score;
