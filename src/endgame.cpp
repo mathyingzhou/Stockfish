@@ -366,6 +366,26 @@ ScaleFactor Endgame<CHESS_VARIANT, KBPsK>::operator()(const Position& pos) const
   return SCALE_FACTOR_NONE;
 }
 
+#ifdef ATOMIC
+template<>
+ScaleFactor Endgame<ATOMIC_VARIANT, KBPsKPs>::operator()(const Position& pos) const {
+
+  assert(pos.variant() == ATOMIC_VARIANT);
+  assert(pos.non_pawn_material(strongSide) == BishopValueMg);
+  assert(pos.count<PAWN>(strongSide) >= 1);
+  assert(pos.count<PAWN>(weakSide) >= 1);
+
+  if (shift<NORTH>(pos.pieces(WHITE, PAWN)) == pos.pieces(BLACK, PAWN))
+  {
+      Bitboard pawns = pos.pieces(weakSide, PAWN);
+      if (!(pawns & ((pos.pieces(strongSide, BISHOP) & DarkSquares) ? DarkSquares : ~DarkSquares)))
+          return SCALE_FACTOR_DRAW;
+  }
+
+  return SCALE_FACTOR_NONE;
+}
+#endif
+
 
 /// KQ vs KR and one or more pawns. It tests for fortress draws with a rook on
 /// the third rank defended by a pawn.

@@ -359,6 +359,9 @@ namespace {
 #endif
 
   Endgame<CHESS_VARIANT, KBPsK>  ScaleKBPsK[]  = { Endgame<CHESS_VARIANT, KBPsK>(WHITE),  Endgame<CHESS_VARIANT, KBPsK>(BLACK) };
+#ifdef ATOMIC
+  Endgame<ATOMIC_VARIANT, KBPsKPs> ScaleAtomicKBPsKPs[] = { Endgame<ATOMIC_VARIANT, KBPsKPs>(WHITE), Endgame<ATOMIC_VARIANT, KBPsKPs>(BLACK) };
+#endif
   Endgame<CHESS_VARIANT, KQKRPs> ScaleKQKRPs[] = { Endgame<CHESS_VARIANT, KQKRPs>(WHITE), Endgame<CHESS_VARIANT, KQKRPs>(BLACK) };
   Endgame<CHESS_VARIANT, KPsK>   ScaleKPsK[]   = { Endgame<CHESS_VARIANT, KPsK>(WHITE),   Endgame<CHESS_VARIANT, KPsK>(BLACK) };
   Endgame<CHESS_VARIANT, KPKP>   ScaleKPKP[]   = { Endgame<CHESS_VARIANT, KPKP>(WHITE),   Endgame<CHESS_VARIANT, KPKP>(BLACK) };
@@ -571,6 +574,14 @@ Entry* probe(const Position& pos) {
       e->factor[BLACK] = uint8_t(npm_b <  RookValueMg   ? SCALE_FACTOR_DRAW :
                                  npm_w <= BishopValueMg ? 4 : 14);
   }
+#ifdef ATOMIC
+  else if (pos.is_atomic())
+  {
+      for (Color c = WHITE; c <= BLACK; ++c)
+          if (is_KBPsK(pos, c) && pos.count<PAWN>(~c) >= 1)
+              e->scalingFunction[c] = &ScaleAtomicKBPsKPs[c];
+  }
+#endif
 
   // Evaluate the material imbalance. We use PIECE_TYPE_NONE as a place holder
   // for the bishop pair "extended piece", which allows us to be more flexible
