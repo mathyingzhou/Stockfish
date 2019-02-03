@@ -967,7 +967,7 @@ namespace {
     safe  = ~pos.pieces(Them);
 #ifdef ATOMIC
     if (pos.is_atomic())
-        safe &= ~pos.pieces(Us) & weak;
+        safe &= ~pos.pieces(Us) | attackedBy2[Them];
     else
 #endif
     safe &= ~attackedBy[Us][ALL_PIECES] | (weak & attackedBy2[Them]);
