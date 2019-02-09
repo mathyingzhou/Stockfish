@@ -240,14 +240,15 @@ namespace {
   };
 
 #ifdef ATOMIC
-  constexpr Score AtomicConfinedKing = S(-100, -100);
-  constexpr Score AtomicDistantKing = S(16, 16);
+  Score AtomicConfinedKing = S(-100, -100);
+  Score AtomicDistantKing = S(16, 16);
 #endif
 #ifdef HORDE
   constexpr Score ImbalancedHorde = S(49, 39);
 #endif
   #undef S
   #undef V
+TUNE(AtomicConfinedKing, AtomicDistantKing);
 
   template<Color Us>
   Score evaluate(const Position& pos, Pawns::Entry* e) {

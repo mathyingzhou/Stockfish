@@ -124,7 +124,7 @@ namespace {
   };
 
   // KingAttackWeights[PieceType] contains king attack weights by piece type
-  constexpr int KingAttackWeights[VARIANT_NB][PIECE_TYPE_NB] = {
+  int KingAttackWeights[VARIANT_NB][PIECE_TYPE_NB] = {
     { 0, 0, 77, 55, 44, 10 },
 #ifdef ANTI
     {},
@@ -162,7 +162,7 @@ namespace {
   };
 
   // Per-variant king danger malus factors
-  constexpr int KingDangerParams[VARIANT_NB][9] = {
+  int KingDangerParams[VARIANT_NB][9] = {
     {    69,  185, -100,  150,    5, -873,   -6,  -25,    0 },
 #ifdef ANTI
     {},
@@ -216,7 +216,7 @@ namespace {
 
   // MobilityBonus[PieceType-2][attacked] contains bonuses for middle and end game,
   // indexed by piece type and number of attacked squares in the mobility area.
-  constexpr Score MobilityBonus[VARIANT_NB][4][32] = {
+  Score MobilityBonus[VARIANT_NB][4][32] = {
     {
     { S(-62,-81), S(-53,-56), S(-12,-30), S( -4,-14), S(  3,  8), S( 13, 15), // Knights
       S( 22, 23), S( 28, 27), S( 33, 33) },
@@ -445,7 +445,7 @@ namespace {
   };
 
 #ifdef ATOMIC
-  constexpr Score ThreatByBlast = S(80, 80);
+  Score ThreatByBlast = S(80, 80);
 #endif
 
 #ifdef THREECHECK
@@ -509,7 +509,7 @@ namespace {
 #endif
 
   // PassedRank[Rank] contains a bonus according to the rank of a passed pawn
-  constexpr Score PassedRank[VARIANT_NB][RANK_NB] = {
+  Score PassedRank[VARIANT_NB][RANK_NB] = {
     {
     S(0, 0), S(5, 18), S(12, 23), S(10, 31), S(57, 62), S(163, 167), S(271, 250)
     },
@@ -556,7 +556,7 @@ namespace {
 
   // Assorted bonuses and penalties
   constexpr Score BishopPawns        = S(  3,  7);
-  constexpr Score CloseEnemies[VARIANT_NB] = {
+  Score CloseEnemies[VARIANT_NB] = {
     S(  8,  0),
 #ifdef ANTI
     S( 0,  0),
@@ -611,6 +611,8 @@ namespace {
   constexpr Score WeakUnopposedPawn  = S( 12, 23);
 
 #undef S
+TUNE(KingAttackWeights, KingDangerParams[ATOMIC_VARIANT], MobilityBonus[ATOMIC_VARIANT],
+     ThreatByBlast, PassedRank[ATOMIC_VARIANT], CloseEnemies[ATOMIC_VARIANT]);
 
   // Evaluation class computes and stores attacks tables and other working data
   template<Tracing T>
