@@ -207,9 +207,6 @@ namespace {
 #ifdef CRAZYHOUSE
   constexpr int PawnSafeCheck   = 435;
 #endif
-#ifdef ATOMIC
-  constexpr int IndirectKingAttack = 883;
-#endif
 #ifdef THREECHECK
   // In Q8 fixed point
   constexpr int ThreeCheckKSFactors[CHECKS_NB] = { 571, 619, 858, 0 };
@@ -1086,13 +1083,6 @@ namespace {
         }
 #endif
 
-#ifdef ATOMIC
-    if (pos.is_atomic())
-    {
-        kingDanger += IndirectKingAttack * popcount(pos.attacks_from<KING>(ksq) & pos.pieces(Us) & weak);
-        score -= make_score(100, 100) * popcount(attackedBy[Us][KING] & pos.pieces());
-    }
-#endif
     // Transform the kingDanger units into a Score, and subtract it from the evaluation
     if (kingDanger > 0)
     {
