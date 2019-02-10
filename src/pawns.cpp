@@ -32,7 +32,7 @@ namespace {
   #define S(mg, eg) make_score(mg, eg)
 
   // Pawn penalties
-  constexpr Score Backward[VARIANT_NB] = {
+  Score Backward[VARIANT_NB] = {
     S( 9, 24),
 #ifdef ANTI
     S(26, 50),
@@ -105,7 +105,7 @@ namespace {
     S(13, 40),
 #endif
   };
-  constexpr Score Isolated[VARIANT_NB] = {
+  Score Isolated[VARIANT_NB] = {
     S( 5, 15),
 #ifdef ANTI
     S(54, 69),
@@ -147,7 +147,7 @@ namespace {
 
   // Strength of pawn shelter for our king by [distance from edge][rank].
   // RANK_1 = 0 is used for files where we have no pawn, or pawn is behind our king.
-  constexpr Value ShelterStrength[VARIANT_NB][int(FILE_NB) / 2][RANK_NB] = {
+  Value ShelterStrength[VARIANT_NB][int(FILE_NB) / 2][RANK_NB] = {
   {
     { V( -6), V( 81), V( 93), V( 58), V( 39), V( 18), V(  25) },
     { V(-43), V( 61), V( 35), V(-49), V(-29), V(-11), V( -63) },
@@ -240,13 +240,15 @@ namespace {
   };
 
 #ifdef ATOMIC
-  constexpr Score AtomicConfinedKing = S(100, 100);
+  Score AtomicConfinedKing = S(100, 100);
 #endif
 #ifdef HORDE
   constexpr Score ImbalancedHorde = S(49, 39);
 #endif
   #undef S
   #undef V
+TUNE(Backward[ATOMIC_VARIANT], Isolated[ATOMIC_VARIANT],
+     ShelterStrength[ATOMIC_VARIANT], AtomicConfinedKing);
 
   template<Color Us>
   Score evaluate(const Position& pos, Pawns::Entry* e) {
