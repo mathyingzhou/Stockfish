@@ -241,7 +241,6 @@ namespace {
 
 #ifdef ATOMIC
   constexpr Score AtomicConfinedKing = S(-100, -100);
-  constexpr Score AtomicDistantKing = S(16, 16);
 #endif
 #ifdef HORDE
   constexpr Score ImbalancedHorde = S(49, 39);
@@ -519,7 +518,7 @@ Score Entry::do_king_safety(const Position& pos) {
   if (pos.is_atomic())
   {
       bonus += AtomicConfinedKing * popcount(DistanceRingBB[ksq][1] & pawns);
-      return make_score(bonus, 0) + (AtomicDistantKing * minKingPawnDistance);
+      return make_score(bonus + 16 * minKingPawnDistance, 16 * minKingPawnDistance);
   }
 #endif
 #ifdef CRAZYHOUSE
