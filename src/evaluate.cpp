@@ -207,9 +207,6 @@ namespace {
 #ifdef CRAZYHOUSE
   constexpr int PawnSafeCheck   = 435;
 #endif
-#ifdef ATOMIC
-  constexpr int IndirectKingAttack = 883;
-#endif
 #ifdef THREECHECK
   // In Q8 fixed point
   constexpr int ThreeCheckKSFactors[CHECKS_NB] = { 571, 619, 858, 0 };
@@ -440,7 +437,12 @@ namespace {
   };
 
 #ifdef ATOMIC
-  constexpr Score ThreatByBlast = S(80, 80);
+  constexpr Score AtomicThreatByMinor[PIECE_TYPE_NB] = {
+    S(0, 0), S(0, 31), S(39, 41), S(57, 43), S(69, 114), S(62, 120)
+  };
+  constexpr Score AtomicThreatByMajor[PIECE_TYPE_NB] = {
+    S(0, 0), S(0, 24), S(38, 72), S(38, 61), S(0, 38), S(51, 38)
+  };
 #endif
 
 #ifdef THREECHECK
@@ -601,6 +603,10 @@ namespace {
   constexpr Score ThreatByPawnPush   = S( 48, 39);
   constexpr Score ThreatByRank       = S( 13,  0);
   constexpr Score ThreatBySafePawn   = S(173, 94);
+#ifdef ATOMIC
+  constexpr Score AtomicThreatByRank = S( 13,  0);
+  constexpr Score AtomicThreatByPawn = S(176, 94);
+#endif
   constexpr Score TrappedRook        = S( 47,  4);
   constexpr Score WeakQueen          = S( 49, 15);
   constexpr Score WeakUnopposedPawn  = S( 12, 23);
@@ -949,8 +955,8 @@ namespace {
     // Attacked squares defended at most once by our queen or king
 #ifdef ATOMIC
     if (pos.is_atomic())
-        weak =  (attackedBy[Them][ALL_PIECES] | (pos.pieces(Them) ^ pos.pieces(Them, KING)))
-              & (~attackedBy[Us][ALL_PIECES] | attackedBy[Us][KING] | (attackedBy[Us][QUEEN] & ~attackedBy2[Us]));
+        weak =  (attackedBy[Them][ALL_PIECES] ^ attackedBy[Them][KING])
+              & ~(attackedBy[Us][ALL_PIECES] ^ attackedBy[Us][KING]);
     else
 #endif
     weak =  attackedBy[Them][ALL_PIECES]
@@ -965,11 +971,12 @@ namespace {
 
     // Analyse the safe enemy's checks which are possible on next move
     safe  = ~pos.pieces(Them);
-    safe &= ~attackedBy[Us][ALL_PIECES] | (weak & attackedBy2[Them]);
 #ifdef ATOMIC
     if (pos.is_atomic())
-        safe |= attackedBy[Us][KING];
+        safe &= ~pos.pieces(Us) | attackedBy2[Them];
+    else
 #endif
+    safe &= ~attackedBy[Us][ALL_PIECES] | (weak & attackedBy2[Them]);
 
     b1 = attacks_bb<ROOK  >(ksq, pos.pieces() ^ pos.pieces(Us, QUEEN));
     b2 = attacks_bb<BISHOP>(ksq, pos.pieces() ^ pos.pieces(Us, QUEEN));
@@ -1085,13 +1092,6 @@ namespace {
         }
 #endif
 
-#ifdef ATOMIC
-    if (pos.is_atomic())
-    {
-        kingDanger += IndirectKingAttack * popcount(pos.attacks_from<KING>(pos.square<KING>(Us)) & pos.pieces(Us) & attackedBy[Them][ALL_PIECES]);
-        score -= make_score(100, 100) * popcount(attackedBy[Us][KING] & pos.pieces());
-    }
-#endif
     // Transform the kingDanger units into a Score, and subtract it from the evaluation
     if (kingDanger > 0)
     {
@@ -1101,18 +1101,20 @@ namespace {
 #endif
         int v = kingDanger * kingDanger / 4096;
 #ifdef ATOMIC
-        if (pos.is_atomic() && v > QueenValueMg)
-            v = QueenValueMg;
+        if (pos.is_atomic())
+            v = std::min(v, (int)QueenValueMg);
 #endif
 #ifdef CRAZYHOUSE
-        if (pos.is_house() && Us == pos.side_to_move())
-            v -= v / 10;
-        if (pos.is_house() && v > QueenValueMg)
-            v = QueenValueMg;
+        if (pos.is_house())
+        {
+            if (Us == pos.side_to_move())
+                v -= v / 10;
+            v = std::min(v, (int)QueenValueMg);
+        }
 #endif
 #ifdef THREECHECK
-        if (pos.is_three_check() && v > QueenValueMg)
-            v = QueenValueMg;
+        if (pos.is_three_check())
+            v = std::min(v, (int)QueenValueMg);
 #endif
         score -= make_score(v, kingDanger / 16 + KDP[8] * v / 256);
     }
@@ -1186,20 +1188,31 @@ namespace {
 #ifdef ATOMIC
     if (pos.is_atomic())
     {
-        Bitboard attacks = pos.pieces(Them) & attackedBy[Us][ALL_PIECES] & ~attackedBy[Us][KING];
-        while (attacks)
+        b = pos.pieces(Them) & (attackedBy[Us][KNIGHT] | attackedBy[Us][BISHOP]) & ~attackedBy[Us][KING];
+        b |= pos.pieces(Them) & adjacent_squares_bb(b);
+        while (b)
         {
-            Square s = pop_lsb(&attacks);
-            Bitboard blast = (pos.attacks_from<KING>(s) & (pos.pieces() ^ pos.pieces(PAWN))) | s;
-            int count = popcount(blast & pos.pieces(Them)) - popcount(blast & pos.pieces(Us)) - 1;
-            if (blast & pos.pieces(Them, QUEEN))
-                count++;
-            if ((blast & pos.pieces(Us, QUEEN)) || ((attackedBy[Us][QUEEN] & s) & ~attackedBy2[Us]))
-                count--;
-            score += std::max(SCORE_ZERO, ThreatByBlast * count);
+            Square s = pop_lsb(&b);
+            score += AtomicThreatByMinor[type_of(pos.piece_on(s))];
+            if (type_of(pos.piece_on(s)) != PAWN)
+                score += AtomicThreatByRank * (int)relative_rank(Them, s);
         }
-        nonPawnEnemies = 0;
+        b = pos.pieces(Them) & (attackedBy[Us][ROOK] | attackedBy[Us][QUEEN]) & ~attackedBy[Us][KING];
+        b |= pos.pieces(Them) & adjacent_squares_bb(b);
+        while (b)
+        {
+            Square s = pop_lsb(&b);
+            score += AtomicThreatByMajor[type_of(pos.piece_on(s))];
+            if (type_of(pos.piece_on(s)) != PAWN)
+                score += AtomicThreatByRank * (int)relative_rank(Them, s);
+        }
+
+        nonPawnEnemies = pos.pieces(Them) & ~pos.pieces(PAWN);
         stronglyProtected = 0;
+
+        b = pawn_attacks_bb<Us>(b) & pos.pieces(Them) & ~attackedBy[Us][KING];
+        b = (b | adjacent_squares_bb(b)) & nonPawnEnemies;
+        score += AtomicThreatByPawn * popcount(b);
     }
     else
 #endif
@@ -1318,8 +1331,18 @@ namespace {
 
     b = pawn_attacks_bb<Us>(b) & nonPawnEnemies;
     score += ThreatBySafePawn * popcount(b);
+    }
 
     // Bonus for threats on the next moves against enemy queen
+#ifdef ANTI
+    if (pos.is_anti()) {} else
+#endif
+#ifdef GRID
+    if (pos.is_grid()) {} else
+#endif
+#ifdef LOSERS
+    if (pos.is_losers()) {} else
+#endif
 #ifdef CRAZYHOUSE
     if ((pos.is_house() ? pos.count<QUEEN>(Them) - pos.count_in_hand<QUEEN>(Them) : pos.count<QUEEN>(Them)) == 1)
 #else
@@ -1337,7 +1360,6 @@ namespace {
            | (attackedBy[Us][ROOK  ] & pos.attacks_from<ROOK  >(s));
 
         score += SliderOnQueen * popcount(b & safe & attackedBy2[Us]);
-    }
     }
 
     if (T)

@@ -239,6 +239,9 @@ namespace {
     { V(-10), V(-14), V( 90), V(15), V( 2), V( -7), V(-16) }
   };
 
+#ifdef ATOMIC
+  constexpr Score AtomicConfinedKing = S(100, 100);
+#endif
 #ifdef HORDE
   constexpr Score ImbalancedHorde = S(49, 39);
 #endif
@@ -482,6 +485,10 @@ Value Entry::evaluate_shelter(const Position& pos, Square ksq) {
       safety -= (ourRank && (ourRank == theirRank - 1)) ? 66 * (theirRank == RANK_3)
                                                         : UnblockedStorm[d][theirRank];
   }
+#ifdef ATOMIC
+  if (pos.is_atomic())
+      safety += AtomicConfinedKing * popcount(DistanceRingBB[ksq][1] & pos.pieces(Us, PAWN));
+#endif
 
   return safety;
 }
