@@ -130,7 +130,7 @@ namespace {
     {},
 #endif
 #ifdef ATOMIC
-    { 0, 0, 76, 64, 46, 11 },
+    { 0, 0, 75, 64, 46, 11 },
 #endif
 #ifdef CRAZYHOUSE
     { 0, 0, 112, 87, 63, 2 },
@@ -168,7 +168,7 @@ namespace {
     {},
 #endif
 #ifdef ATOMIC
-    {   274,  166, -100,  146,    5, -654,  -12,   -7,   29 },
+    {   278,  171,  -99,  146,    5, -658,  -12,   -7,   29 },
 #endif
 #ifdef CRAZYHOUSE
     {   119,  439, -100,  130,    5, -613,   -6,   -1,  320 },
@@ -251,19 +251,19 @@ namespace {
 #endif
 #ifdef ATOMIC
     {
-      { S(-86,-77), S(-79,-64), S(-36,-40), S( -2,-24), S( 14,  8), S( 23, 25), // Knights
-        S( 40, 26), S( 30, 23), S( 37, 29) },
-      { S(-55,-65), S(-17,-34), S( 13, -9), S( 24, 20), S( 22, 25), S( 57, 39), // Bishops
-        S( 32, 52), S( 66, 66), S( 51, 52), S( 56, 74), S( 73, 76), S( 85, 81),
-        S( 93, 90), S(108, 87) },
-      { S(-61,-73), S(-32,-28), S(-18,  9), S(-19, 30), S(-19, 57), S( 20, 78), // Rooks
-        S( 12,104), S( 11,134), S( 21,133), S( 33,166), S( 35,168), S( 38,185),
-        S( 25,172), S( 60,182), S( 58,155) },
-      { S(-43,-43), S(-14,-16), S( -5,  1), S(  0, 23), S(  6, 24), S( 23, 59), // Queens
-        S( 20, 55), S( 32, 66), S( 47, 89), S( 29, 77), S( 47, 89), S( 69,103),
-        S( 63,110), S( 76,131), S( 73,115), S( 48,132), S( 58,131), S( 75,135),
-        S( 82,122), S(111,130), S(114,144), S(101,139), S(106,146), S(107,167),
-        S(115,157), S(129,175), S(132,176), S(130,210) }
+      { S(-87,-76), S(-80,-65), S(-36,-40), S( -2,-24), S( 14,  8), S( 23, 25), // Knights
+        S( 40, 26), S( 29, 23), S( 37, 28) },
+      { S(-55,-66), S(-17,-34), S( 13, -9), S( 24, 20), S( 22, 25), S( 57, 39), // Bishops
+        S( 31, 52), S( 66, 66), S( 51, 51), S( 57, 74), S( 73, 76), S( 87, 81),
+        S( 93, 89), S(107, 86) },
+      { S(-60,-70), S(-32,-28), S(-18,  9), S(-19, 30), S(-19, 57), S( 20, 79), // Rooks
+        S( 12,107), S( 11,136), S( 21,135), S( 33,165), S( 35,171), S( 38,186),
+        S( 25,171), S( 60,183), S( 57,154) },
+      { S(-44,-44), S(-14,-16), S( -5,  1), S(  0, 23), S(  6, 25), S( 23, 60), // Queens
+        S( 20, 55), S( 32, 66), S( 47, 90), S( 28, 75), S( 47, 88), S( 68,105),
+        S( 63,109), S( 78,134), S( 73,113), S( 47,133), S( 59,130), S( 75,136),
+        S( 83,124), S(111,130), S(113,141), S(102,136), S(106,147), S(108,166),
+        S(115,156), S(132,178), S(130,179), S(129,208) }
     },
 #endif
 #ifdef CRAZYHOUSE
@@ -436,15 +436,6 @@ namespace {
     S(0, 0), S(0, 24), S(38, 71), S(38, 61), S(0, 38), S(51, 38)
   };
 
-#ifdef ATOMIC
-  constexpr Score AtomicThreatByMinor[PIECE_TYPE_NB] = {
-    S(0, 0), S(0, 31), S(39, 41), S(57, 43), S(69, 114), S(62, 120)
-  };
-  constexpr Score AtomicThreatByMajor[PIECE_TYPE_NB] = {
-    S(0, 0), S(0, 24), S(38, 72), S(38, 61), S(0, 38), S(51, 38)
-  };
-#endif
-
 #ifdef THREECHECK
   constexpr Score ChecksGivenBonus[CHECKS_NB] = {
       S(0, 0),
@@ -514,7 +505,7 @@ namespace {
     { S(0, 0), S(5, 7), S(5, 14), S(31, 38), S(73, 73), S(166, 166), S(252, 252) },
 #endif
 #ifdef ATOMIC
-    { S(0, 0), S(95, 86), S(118, 43), S(94, 61), S(142, 62), S(196, 150), S(204, 256) },
+    { S(0, 0), S(95, 86), S(116, 43), S(92, 61), S(143, 62), S(198, 147), S(203, 255) },
 #endif
 #ifdef CRAZYHOUSE
     { S(0, 0), S(15, 27), S(23, 13), S(13, 19), S(88, 111), S(177, 140), S(229, 293) },
@@ -603,10 +594,6 @@ namespace {
   constexpr Score ThreatByPawnPush   = S( 48, 39);
   constexpr Score ThreatByRank       = S( 13,  0);
   constexpr Score ThreatBySafePawn   = S(173, 94);
-#ifdef ATOMIC
-  constexpr Score AtomicThreatByRank = S( 13,  0);
-  constexpr Score AtomicThreatByPawn = S(176, 94);
-#endif
   constexpr Score TrappedRook        = S( 47,  4);
   constexpr Score WeakQueen          = S( 49, 15);
   constexpr Score WeakUnopposedPawn  = S( 12, 23);
@@ -1193,18 +1180,18 @@ namespace {
         while (b)
         {
             Square s = pop_lsb(&b);
-            score += AtomicThreatByMinor[type_of(pos.piece_on(s))];
+            score += ThreatByMinor[type_of(pos.piece_on(s))];
             if (type_of(pos.piece_on(s)) != PAWN)
-                score += AtomicThreatByRank * (int)relative_rank(Them, s);
+                score += ThreatByRank * (int)relative_rank(Them, s);
         }
         b = pos.pieces(Them) & (attackedBy[Us][ROOK] | attackedBy[Us][QUEEN]) & ~attackedBy[Us][KING];
         b |= pos.pieces(Them) & adjacent_squares_bb(b);
         while (b)
         {
             Square s = pop_lsb(&b);
-            score += AtomicThreatByMajor[type_of(pos.piece_on(s))];
+            score += ThreatByRook[type_of(pos.piece_on(s))];
             if (type_of(pos.piece_on(s)) != PAWN)
-                score += AtomicThreatByRank * (int)relative_rank(Them, s);
+                score += ThreatByRank * (int)relative_rank(Them, s);
         }
 
         nonPawnEnemies = pos.pieces(Them) & ~pos.pieces(PAWN);
@@ -1212,7 +1199,7 @@ namespace {
 
         b = pawn_attacks_bb<Us>(b) & pos.pieces(Them) & ~attackedBy[Us][KING];
         b = (b | adjacent_squares_bb(b)) & nonPawnEnemies;
-        score += AtomicThreatByPawn * popcount(b);
+        score += ThreatBySafePawn * popcount(b);
     }
     else
 #endif

@@ -111,7 +111,7 @@ namespace {
     S(54, 69),
 #endif
 #ifdef ATOMIC
-    S(24, 14),
+    S(23, 14),
 #endif
 #ifdef CRAZYHOUSE
     S(30, 27),
@@ -159,9 +159,9 @@ namespace {
 #endif
 #ifdef ATOMIC
   {
-    { V( 7), V(76), V(84), V( 38), V( 7), V( 30), V(-19) },
-    { V(-3), V(93), V(52), V(-17), V(12), V(-22), V(-35) },
-    { V(-6), V(83), V(25), V(-24), V(15), V( 22), V(-39) },
+    { V( 7), V(75), V(84), V( 38), V( 7), V( 30), V(-19) },
+    { V(-3), V(92), V(52), V(-17), V(12), V(-22), V(-35) },
+    { V(-6), V(82), V(25), V(-24), V(15), V( 22), V(-38) },
     { V(11), V(83), V(19), V(  8), V(18), V(-21), V(-30) }
   },
 #endif
@@ -240,7 +240,7 @@ namespace {
   };
 
 #ifdef ATOMIC
-  constexpr Score AtomicConfinedKing = S(100, 100);
+  constexpr Score AtomicConfinedKing = S( 97, 101);
 #endif
 #ifdef HORDE
   constexpr Score ImbalancedHorde = S(49, 39);
