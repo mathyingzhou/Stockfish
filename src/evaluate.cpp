@@ -1348,10 +1348,12 @@ namespace {
 #ifdef ATOMIC
     if (pos.is_atomic())
     {
-        nonPawnEnemies = adjacent_squares_bb(pos.pieces(Them, QUEEN)) & pos.pieces(Them) & ~stronglyProtected;
-        while (nonPawnEnemies)
+        // In atomic, king (or adjacent) can be attacked but not in check
+        weak = pos.pieces(Them, KING, QUEEN);
+        weak = (adjacent_squares_bb(weak) | weak) & pos.pieces(Them) & ~stronglyProtected;
+        while (weak)
         {
-            Square s = pop_lsb(&nonPawnEnemies);
+            Square s = pop_lsb(&weak);
             safe = mobilityArea[Us] & ~stronglyProtected;
 
             b = attackedBy[Us][KNIGHT] & pos.attacks_from<KNIGHT>(s);
