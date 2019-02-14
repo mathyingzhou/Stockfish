@@ -1188,6 +1188,7 @@ namespace {
     if (pos.is_atomic())
     {
         // Opponent's pieces adjacent to our king are considered protected
+        nonPawnEnemies = pos.pieces(Them) & ~pos.pieces(PAWN);
         stronglyProtected = DistanceRingBB[pos.square<KING>(Us)][1] | pos.square<KING>(Us);
         b = pos.pieces(Them) & attackedBy[Us][ALL_PIECES] & ~stronglyProtected;
         while (b)
@@ -1202,7 +1203,6 @@ namespace {
             score += std::max(SCORE_ZERO, ThreatByBlast * count);
         }
         safe = ~(adjacent_squares_bb(pos.pieces(Us, KING, QUEEN)) | pos.pieces(Us, KING, QUEEN));
-        nonPawnEnemies = 0;
     }
     else
 #endif
