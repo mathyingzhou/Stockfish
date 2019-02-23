@@ -440,15 +440,16 @@ namespace {
   };
 
 #ifdef ATOMIC
-  constexpr Score ThreatByBlast[PIECE_TYPE_NB] = {
-    S(PawnValueMgAtomic / 8, PawnValueEgAtomic / 8),
-    S(KnightValueMgAtomic / 8, KnightValueEgAtomic / 8),
-    S(BishopValueMgAtomic / 8, BishopValueEgAtomic / 8),
-    S(RookValueMgAtomic / 8, RookValueEgAtomic / 8),
-    S(QueenValueMgAtomic / 8, QueenValueEgAtomic / 8),
+  Score ThreatByBlast[PIECE_TYPE_NB] = {
+    S(100, 100),
+    S(100, 100),
+    S(100, 100),
+    S(100, 100),
+    S(200, 200),
     S(0, 0)
   };
 #endif
+TUNE(ThreatByBlast);
 
 #ifdef THREECHECK
   constexpr Score ChecksGivenBonus[CHECKS_NB] = {
